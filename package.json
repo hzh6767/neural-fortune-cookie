@@ -1,0 +1,10 @@
+{
+  "name": "neural-fortune-cookie",
+  "version": "0.7.0",
+  "description": "A tiny offline AI-style fortune generator with zero dependencies.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/app.test.js"
+  }
+}

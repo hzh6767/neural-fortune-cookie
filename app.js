@@ -25,61 +25,101 @@ const fortunes = {
   ]
 };
 const addOns = [" and a strangely lucky receipt.", " before the kettle clicks.", " (the pigeons already know).", "; let the odd detail lead.", " with a 73% chance of snacks."];
-const form = document.querySelector('#fortune-form');
-const nameInput = document.querySelector('#name');
-const moodInput = document.querySelector('#mood');
-const questionInput = document.querySelector('#question');
-const text = document.querySelector('#fortune-text');
-const kicker = document.querySelector('#fortune-kicker');
-const tag = document.querySelector('#fortune-tag');
-const copyButton = document.querySelector('#copy-button');
-const history = document.querySelector('#history');
-const clearHistory = document.querySelector('#clear-history');
-const meterBars = [...document.querySelectorAll('.meter span')];
-let currentFortune = '';
-let historyItems = [];
+const MAX_HISTORY = 4;
 
 function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
-function renderHistory() {
-  history.replaceChildren();
-  if (historyItems.length === 0) {
-    const empty = document.createElement('li');
-    empty.className = 'empty-history';
-    empty.textContent = 'Your future will appear here.';
-    history.append(empty);
-    return;
+function formatFortune(name, base, addOn) { return `${name ? `${name}, ` : ''}${base}${addOn}`; }
+function formatKicker(question) { return question ? `Regarding: “${question}”` : 'A general-purpose cosmic nudge'; }
+function formatTime(date) { return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+function activeBarCount() { return 2 + Math.floor(Math.random() * 4); }
+function addToHistory(items, entry) { return [entry, ...items].slice(0, MAX_HISTORY); }
+
+if (typeof document !== 'undefined') {
+  const form = document.querySelector('#fortune-form');
+  const nameInput = document.querySelector('#name');
+  const moodInput = document.querySelector('#mood');
+  const questionInput = document.querySelector('#question');
+  const text = document.querySelector('#fortune-text');
+  const kicker = document.querySelector('#fortune-kicker');
+  const tag = document.querySelector('#fortune-tag');
+  const copyButton = document.querySelector('#copy-button');
+  const history = document.querySelector('#history');
+  const clearHistory = document.querySelector('#clear-history');
+  const meterBars = [...document.querySelectorAll('.meter span')];
+  let currentFortune = '';
+  let historyItems = [];
+  let copyLabelTimer;
+
+  function renderHistory() {
+    history.replaceChildren();
+    if (historyItems.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'empty-history';
+      empty.textContent = 'Your future will appear here.';
+      history.append(empty);
+      return;
+    }
+    historyItems.forEach((item) => {
+      const entry = document.createElement('li');
+      const time = document.createElement('time');
+      const fortune = document.createElement('span');
+      const mood = document.createElement('span');
+      time.dateTime = item.iso;
+      time.textContent = item.time;
+      fortune.textContent = item.fortune;
+      mood.className = 'tag';
+      mood.textContent = item.mood;
+      entry.append(time, fortune, mood);
+      history.append(entry);
+    });
   }
-  historyItems.forEach((item) => {
-    const entry = document.createElement('li');
-    const time = document.createElement('time');
-    const fortune = document.createElement('span');
-    const mood = document.createElement('span');
-    time.textContent = item.time;
-    fortune.textContent = item.fortune;
-    mood.className = 'tag';
-    mood.textContent = item.mood;
-    entry.append(time, fortune, mood);
-    history.append(entry);
+
+  function selectFortune() {
+    const selection = window.getSelection();
+    if (!selection) return;
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  function setCopyLabel(label, delay) {
+    clearTimeout(copyLabelTimer);
+    copyButton.textContent = label;
+    copyLabelTimer = setTimeout(() => { copyButton.textContent = 'Copy fortune'; }, delay);
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = nameInput.value.trim();
+    const mood = moodInput.value;
+    const question = questionInput.value.trim();
+    currentFortune = formatFortune(name, pick(fortunes[mood]), pick(addOns));
+    text.textContent = currentFortune;
+    kicker.textContent = formatKicker(question);
+    tag.textContent = `${mood.toUpperCase()} / CRACKED`;
+    copyButton.disabled = false;
+    const activeBars = activeBarCount();
+    meterBars.forEach((bar, index) => bar.classList.toggle('active', index < activeBars));
+    const now = new Date();
+    historyItems = addToHistory(historyItems, { time: formatTime(now), iso: now.toISOString(), fortune: currentFortune, mood: mood.toUpperCase() });
+    renderHistory();
   });
+
+  copyButton.addEventListener('click', async () => {
+    if (!currentFortune) return;
+    try {
+      await navigator.clipboard.writeText(currentFortune);
+      setCopyLabel('Copied', 1400);
+    } catch {
+      selectFortune();
+      setCopyLabel('Press Ctrl/Cmd+C', 3000);
+    }
+  });
+
+  clearHistory.addEventListener('click', () => { historyItems = []; renderHistory(); });
 }
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const name = nameInput.value.trim();
-  const mood = moodInput.value;
-  const question = questionInput.value.trim();
-  const base = pick(fortunes[mood]);
-  currentFortune = `${name ? `${name}, ` : ''}${base}${pick(addOns)}`;
-  text.textContent = currentFortune;
-  kicker.textContent = question ? `Regarding: “${question}”` : 'A general-purpose cosmic nudge';
-  tag.textContent = `${mood.toUpperCase()} / CRACKED`;
-  copyButton.disabled = false;
-  meterBars.forEach((bar, index) => bar.classList.toggle('active', index < 2 + Math.floor(Math.random() * 4)));
-  historyItems.unshift({ time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), fortune: currentFortune, mood: mood.toUpperCase() });
-  historyItems = historyItems.slice(0, 4);
-  renderHistory();
-});
-copyButton.addEventListener('click', async () => {
-  if (!currentFortune) return;
-  try { await navigator.clipboard.writeText(currentFortune); copyButton.textContent = 'Copied'; setTimeout(() => { copyButton.textContent = 'Copy fortune'; }, 1400); } catch { copyButton.textContent = 'Select to copy'; }
-});
-clearHistory.addEventListener('click', () => { historyItems = []; renderHistory(); });
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { fortunes, addOns, MAX_HISTORY, pick, formatFortune, formatKicker, formatTime, activeBarCount, addToHistory };
+}

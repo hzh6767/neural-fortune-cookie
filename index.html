@@ -16,7 +16,7 @@
         <h1>Neural Fortune Cookie</h1>
         <p class="lede">A tiny prediction engine for questions too strange for science.</p>
       </div>
-      <div class="signal" aria-label="Oracle status"><span></span> signal: snack-sized</div>
+      <div class="signal" aria-label="Oracle status"><span aria-hidden="true"></span> signal: snack-sized</div>
     </header>
 
     <section class="workspace" aria-label="Fortune cookie generator">
@@ -37,21 +37,23 @@
         <p class="tiny-note">No servers. No tracking. Just locally generated nonsense.</p>
       </form>
 
-      <section class="panel answer-panel" aria-live="polite">
+      <section class="panel answer-panel">
         <div class="panel-heading"><span>02</span><h2>Today's transmission</h2></div>
         <div id="cookie" class="cookie" aria-hidden="true"><span></span><span></span></div>
-        <p id="fortune-kicker" class="kicker">Awaiting a question...</p>
-        <blockquote id="fortune-text">The cookie is still deciding whether you can handle the truth.</blockquote>
+        <div class="transmission" role="status">
+          <p id="fortune-kicker" class="kicker">Awaiting a question...</p>
+          <blockquote id="fortune-text">The cookie is still deciding whether you can handle the truth.</blockquote>
+        </div>
         <div class="answer-meta"><span id="fortune-tag">UNCRACKED</span><button id="copy-button" class="text-button" type="button" disabled>Copy fortune</button></div>
-        <div class="meter"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="meter" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
       </section>
     </section>
 
     <section class="history-wrap" aria-label="Fortune history">
       <div class="history-heading"><h2>Recent prophecies</h2><button id="clear-history" class="text-button" type="button">Clear history</button></div>
-      <ol id="history" class="history"><li class="empty-history">Your future will appear here.</li></ol>
+      <ol id="history" class="history" aria-live="polite"><li class="empty-history">Your future will appear here.</li></ol>
     </section>
-    <footer>Built for curious humans. The neural network is three arrays in a trench coat.</footer>
+    <footer>Built for curious humans. The neural network is five arrays in a trench coat.</footer>
   </main>
   <script src="app.js"></script>
 </body>
