@@ -77,8 +77,9 @@ test('addToHistory does not mutate the list it is given', () => {
 
 test('history entries are built with a machine-readable ISO timestamp source', () => {
   const now = new Date(2026, 0, 2, 14, 32);
-  assert.strictEqual(now.toISOString(), '2026-01-02T14:32:00.000Z'.replace('14:32:00.000', new Date(2026, 0, 2, 14, 32).toISOString().slice(11)));
-  assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(now.toISOString()));
+  const iso = now.toISOString();
+  assert.ok(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(iso), `ISO format check failed: ${iso}`);
+  assert.strictEqual(iso.slice(0, 10), '2026-01-02');
 });
 
 console.log(`\n${passed} passing`);
