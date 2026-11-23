@@ -24,7 +24,13 @@ const fortunes = {
     "You are right to ask for receipts. The receipt is a surprisingly fun afternoon."
   ]
 };
-const addOns = [" and a strangely lucky receipt.", " before the kettle clicks.", " (the pigeons already know).", "; let the odd detail lead.", " with a 73% chance of snacks."];
+const addOns = [
+  " Keep the strangely lucky receipt.",
+  " Make your move before the kettle clicks.",
+  " The pigeons already know.",
+  " Let the odd detail lead.",
+  " Expect a 73% chance of snacks."
+];
 const MAX_HISTORY = 4;
 
 function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
