@@ -55,6 +55,7 @@ if (typeof document !== 'undefined') {
   let currentFortune = '';
   let historyItems = [];
   let copyLabelTimer;
+  let copyRequest = 0;
 
   function renderHistory() {
     history.replaceChildren();
@@ -104,6 +105,9 @@ if (typeof document !== 'undefined') {
     text.textContent = currentFortune;
     kicker.textContent = formatKicker(question);
     tag.textContent = `${mood.toUpperCase()} / CRACKED`;
+    copyRequest++;
+    clearTimeout(copyLabelTimer);
+    copyButton.textContent = 'Copy fortune';
     copyButton.disabled = false;
     const activeBars = activeBarCount();
     meterBars.forEach((bar, index) => bar.classList.toggle('active', index < activeBars));
@@ -114,10 +118,14 @@ if (typeof document !== 'undefined') {
 
   copyButton.addEventListener('click', async () => {
     if (!currentFortune) return;
+    const request = ++copyRequest;
+    clearTimeout(copyLabelTimer);
+    copyButton.textContent = 'Copy fortune';
     try {
       await navigator.clipboard.writeText(currentFortune);
-      setCopyLabel('Copied', 1400);
+      if (request === copyRequest) setCopyLabel('Copied', 1400);
     } catch {
+      if (request !== copyRequest) return;
       selectFortune();
       setCopyLabel('Press Ctrl/Cmd+C', 3000);
     }
