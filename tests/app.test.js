@@ -40,6 +40,12 @@ test('formatFortune prefixes the name only when one is given', () => {
   assert.strictEqual(app.formatFortune('', 'A base.', ' An add-on.'), 'A base. An add-on.');
 });
 
+test('each add-on starts a new sentence after the complete prediction', () => {
+  for (const addOn of app.addOns) {
+    assert.match(app.formatFortune('', 'Prediction.', addOn), /^Prediction\. [A-Z]/);
+  }
+});
+
 test('formatKicker quotes the question and falls back when blank', () => {
   assert.strictEqual(app.formatKicker('Is it Friday?'), 'Regarding: \u201cIs it Friday?\u201d');
   assert.strictEqual(app.formatKicker(''), 'A general-purpose cosmic nudge');

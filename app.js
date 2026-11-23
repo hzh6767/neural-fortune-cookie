@@ -24,7 +24,13 @@ const fortunes = {
     "You are right to ask for receipts. The receipt is a surprisingly fun afternoon."
   ]
 };
-const addOns = [" and a strangely lucky receipt.", " before the kettle clicks.", " (the pigeons already know).", "; let the odd detail lead.", " with a 73% chance of snacks."];
+const addOns = [
+  " Keep the strangely lucky receipt.",
+  " Make your move before the kettle clicks.",
+  " The pigeons already know.",
+  " Let the odd detail lead.",
+  " Expect a 73% chance of snacks."
+];
 const MAX_HISTORY = 4;
 
 function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
@@ -49,6 +55,7 @@ if (typeof document !== 'undefined') {
   let currentFortune = '';
   let historyItems = [];
   let copyLabelTimer;
+  let copyRequest = 0;
 
   function renderHistory() {
     history.replaceChildren();
@@ -98,6 +105,9 @@ if (typeof document !== 'undefined') {
     text.textContent = currentFortune;
     kicker.textContent = formatKicker(question);
     tag.textContent = `${mood.toUpperCase()} / CRACKED`;
+    copyRequest++;
+    clearTimeout(copyLabelTimer);
+    copyButton.textContent = 'Copy fortune';
     copyButton.disabled = false;
     const activeBars = activeBarCount();
     meterBars.forEach((bar, index) => bar.classList.toggle('active', index < activeBars));
@@ -108,10 +118,14 @@ if (typeof document !== 'undefined') {
 
   copyButton.addEventListener('click', async () => {
     if (!currentFortune) return;
+    const request = ++copyRequest;
+    clearTimeout(copyLabelTimer);
+    copyButton.textContent = 'Copy fortune';
     try {
       await navigator.clipboard.writeText(currentFortune);
-      setCopyLabel('Copied', 1400);
+      if (request === copyRequest) setCopyLabel('Copied', 1400);
     } catch {
+      if (request !== copyRequest) return;
       selectFortune();
       setCopyLabel('Press Ctrl/Cmd+C', 3000);
     }
